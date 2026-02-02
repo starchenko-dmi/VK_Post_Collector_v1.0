@@ -13,7 +13,7 @@ vk-api = "11.9.5"
 openpyxl = "3.1.2"
 tkcalendar = "1.6.1"
 requests = "2.31.0"
-Pillow = "10.2.0"
+Pillow = ">=10.3.0"
 
 [tool.poetry.scripts]
 start = "src.main:main"
