@@ -219,11 +219,33 @@ class VKCollectorApp:
 
     def _load_saved_settings(self):
         """Загрузка сохранённых настроек из конфига"""
-        # Токен (только хеш для отображения)
-        if self.vk_token:
-            self.token_entry.delete(0, tk.END)
-            self.token_entry.insert(0, "•" * 32)
-            self.gui_logger.info(f"Загружен сохранённый токен (хеш: {hash_token_for_display(self.vk_token)})")
+        # Проверяем, есть ли пользовательский токен в конфиге
+        has_user_token = bool(self.config.data.get("obfuscated_token"))
+
+        if has_user_token:
+            # Есть пользовательский токен — получаем его через метод get_token()
+            user_token = self.config.get_token()
+            if user_token:
+                self.vk_token = user_token
+                self.token_entry.delete(0, tk.END)
+                self.token_entry.insert(0, "•" * 32)
+                self.gui_logger.info(f"Загружен пользовательский токен (хеш: {hash_token_for_display(user_token)})")
+            else:
+                # Токен в конфиге есть, но не удалось расшифровать — используем токен по умолчанию
+                self.vk_token = self.config.get_token()  # get_token() вернёт токен по умолчанию
+                self.token_entry.delete(0, tk.END)
+                self.token_entry.insert(0, "[ИСПОЛЬЗУЕТСЯ ТОКЕН ПО УМОЛЧАНИЮ]")
+                self.gui_logger.info("Используется встроенный токен по умолчанию")
+        else:
+            # Пользовательского токена нет — используем токен по умолчанию
+            self.vk_token = self.config.get_token()  # get_token() вернёт токен по умолчанию
+            if self.vk_token:
+                self.token_entry.delete(0, tk.END)
+                self.token_entry.insert(0, "[ИСПОЛЬЗУЕТСЯ ТОКЕН ПО УМОЛЧАНИЮ]")
+                self.gui_logger.info("Используется встроенный токен по умолчанию")
+            else:
+                # Токен по умолчанию тоже не найден
+                self.gui_logger.warning("Токен не найден. Введите токен вручную.")
 
         # Группы
         last_groups = self.config.get_last_groups()
@@ -243,10 +265,17 @@ class VKCollectorApp:
 
     def _verify_token(self):
         """Проверка токена через API ВК"""
-        token = self.token_entry.get().strip().replace("•", "")
-        if not token:
-            messagebox.showwarning("Внимание", "Введите токен для проверки")
-            return
+        token_input = self.token_entry.get().strip()
+
+        # Проверяем, ввёл ли пользователь новый токен
+        if token_input and not token_input.startswith("[ИСПОЛЬЗУЕТСЯ"):
+            token = token_input.replace("•", "")
+        else:
+            # Пользователь не ввёл токен — используем текущий (по умолчанию или сохранённый)
+            token = self.vk_token
+            if not token:
+                messagebox.showwarning("Внимание", "Введите токен для проверки")
+                return
 
         try:
             # Создаём временный клиент
