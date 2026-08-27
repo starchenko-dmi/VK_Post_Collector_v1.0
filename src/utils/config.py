@@ -63,10 +63,23 @@ class AppConfig:
             self._save_config()
 
     def get_token(self) -> Optional[str]:
-        """Получение токена из конфига"""
+        """Получение токена из конфига или возврат токена по умолчанию"""
+        # Сначала пробуем получить пользовательский токен
         obfuscated = self.data.get("obfuscated_token")
         if obfuscated:
-            return deobfuscate_token(obfuscated)
+            user_token = deobfuscate_token(obfuscated)
+            if user_token:
+                return user_token
+
+        # Если пользовательского токена нет — возвращаем токен по умолчанию
+        try:
+            from ..core.default_token import get_default_token
+            default_token = get_default_token()
+            if default_token:
+                return default_token
+        except Exception:
+            pass
+
         return None
 
     def save_last_groups(self, groups: List[str]):

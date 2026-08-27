@@ -1,23 +1,20 @@
-# -*- coding: utf-8 -*-
-"""Базовая обфускация токена (защита от случайного просмотра)"""
+"""Обфускация токена (работает на любом компьютере)"""
 import base64
-import os
-import getpass
 import hashlib
 
+
 def _get_salt() -> str:
-    """Генерация соли из уникальных данных пользователя Windows"""
-    computer = os.environ.get("COMPUTERNAME", "DEFAULT_PC")
-    user = getpass.getuser()
-    static_salt = "VK_COLLECTOR_2026_SECRET_SALT"
-    return f"{computer}_{user}_{static_salt}"
+    """Статическая соль - работает на любом компьютере"""
+    return "VK_COLLECTOR_2026_SECRET_SALT_FIXED"
+
 
 def obfuscate_token(token: str) -> str:
-    """Простая обфускация токена через base64 + соль"""
+    """Обфускация токена через base64 + соль"""
     salt = _get_salt()
-    # Добавляем соль в начало и конец для усложнения реверса
+    # Добавляем соль в начало и конец
     obfuscated = f"{salt[:8]}{token}{salt[-8:]}"
     return base64.b64encode(obfuscated.encode("utf-8")).decode("utf-8")
+
 
 def deobfuscate_token(obfuscated: str) -> str | None:
     """Восстановление токена из обфусцированной строки"""
@@ -30,6 +27,7 @@ def deobfuscate_token(obfuscated: str) -> str | None:
         return None
     except Exception:
         return None
+
 
 def hash_token_for_display(token: str) -> str:
     """Хеширование токена для отображения в логах (первые 8 символов)"""
