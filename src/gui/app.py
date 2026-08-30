@@ -76,7 +76,7 @@ class VKCollectorApp:
 
     def _create_settings_tab(self):
         """Создание вкладки 'Настройки'"""
-        # Токен
+        # --- Токен ---
         token_frame = ttk.LabelFrame(self.settings_frame, text="Токен доступа ВКонтакте", padding=10)
         token_frame.pack(fill=tk.X, padx=5, pady=5)
 
@@ -84,7 +84,7 @@ class VKCollectorApp:
         self.token_entry = ttk.Entry(token_frame, width=50, show="•")
         self.token_entry.grid(row=0, column=1, sticky=tk.EW, padx=5, pady=5)
 
-        # Контекстное меню для вставки (решение проблемы с маскировкой)
+        # Контекстное меню для вставки
         token_menu = tk.Menu(self.token_entry, tearoff=0)
         token_menu.add_command(label="Вставить", command=lambda: self.token_entry.event_generate("<<Paste>>"))
         token_menu.add_command(label="Копировать", command=lambda: self.token_entry.event_generate("<<Copy>>"))
@@ -93,20 +93,18 @@ class VKCollectorApp:
         def show_token_menu(event):
             token_menu.tk_popup(event.x_root, event.y_root)
 
-        self.token_entry.bind("<Button-3>", show_token_menu)  # ПКМ на Windows
-        self.token_entry.bind("<Button-2>", show_token_menu)  # Средняя кнопка на Linux
+        self.token_entry.bind("<Button-3>", show_token_menu)
+        self.token_entry.bind("<Button-2>", show_token_menu)
 
-        ttk.Button(token_frame, text="Проверить токен", command=self._verify_token).grid(row=0, column=2, padx=5,
-                                                                                         pady=5)
+        ttk.Button(token_frame, text="Проверить токен", command=self._verify_token).grid(row=0, column=2, padx=5, pady=5)
 
         self.remember_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(token_frame, text="Запомнить токен (в защищённом хранилище)", variable=self.remember_var).grid(
             row=1, column=0, columnspan=3, sticky=tk.W, pady=5
         )
-
         token_frame.columnconfigure(1, weight=1)
 
-        # Группы
+        # --- Группы ---
         groups_frame = ttk.LabelFrame(self.settings_frame, text="Список групп (до 30)", padding=10)
         groups_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -117,6 +115,7 @@ class VKCollectorApp:
 
         self.groups_text = tk.Text(groups_frame, height=8, width=60)
         self.groups_text.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, padx=5, pady=5)
+
         # Контекстное меню для поля групп
         groups_menu = tk.Menu(self.groups_text, tearoff=0)
         groups_menu.add_command(label="Вставить", command=lambda: self.groups_text.event_generate("<<Paste>>"))
@@ -126,8 +125,8 @@ class VKCollectorApp:
         def show_groups_menu(event):
             groups_menu.tk_popup(event.x_root, event.y_root)
 
-        self.groups_text.bind("<Button-3>", show_groups_menu)  # ПКМ на Windows
-        self.groups_text.bind("<Button-2>", show_groups_menu)  # Средняя кнопка на Linux
+        self.groups_text.bind("<Button-3>", show_groups_menu)
+        self.groups_text.bind("<Button-2>", show_groups_menu)
 
         ttk.Button(groups_frame, text="Загрузить из файла", command=self._load_groups_from_file).grid(
             row=2, column=0, sticky=tk.W, padx=5, pady=5
@@ -135,16 +134,14 @@ class VKCollectorApp:
         ttk.Button(groups_frame, text="Очистить", command=lambda: self.groups_text.delete("1.0", tk.END)).grid(
             row=2, column=1, sticky=tk.E, padx=5, pady=5
         )
-
         groups_frame.columnconfigure(0, weight=1)
         groups_frame.columnconfigure(1, weight=1)
         groups_frame.rowconfigure(1, weight=1)
 
-        # Период и директория
+        # --- Период и директория ---
         bottom_frame = ttk.Frame(self.settings_frame)
         bottom_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        # Даты
         date_frame = ttk.LabelFrame(bottom_frame, text="Период сбора", padding=10)
         date_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
 
@@ -158,7 +155,6 @@ class VKCollectorApp:
                                  date_pattern='dd.mm.yyyy')
         self.date_to.grid(row=1, column=1, padx=5, pady=5)
 
-        # Директория
         dir_frame = ttk.LabelFrame(bottom_frame, text="Директория сохранения", padding=10)
         dir_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
@@ -169,7 +165,6 @@ class VKCollectorApp:
 
     def _create_run_tab(self):
         """Создание вкладки 'Запуск'"""
-        # Кнопка запуска
         control_frame = ttk.Frame(self.run_frame)
         control_frame.pack(fill=tk.X, padx=10, pady=10)
 
@@ -184,7 +179,6 @@ class VKCollectorApp:
         ttk.Button(control_frame, text="📁 Открыть папку с результатами", command=self._open_output_dir).pack(
             side=tk.RIGHT, padx=5)
 
-        # Прогресс-бар
         progress_frame = ttk.Frame(self.run_frame)
         progress_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
 
@@ -195,11 +189,9 @@ class VKCollectorApp:
         self.progress_label = ttk.Label(progress_frame, text="Готов к сбору")
         self.progress_label.pack(anchor=tk.W, pady=(5, 0))
 
-        # Лог-панель
         log_frame = ttk.LabelFrame(self.run_frame, text="Лог процесса", padding=10)
         log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Стилизация текста в логе
         self.log_text = tk.Text(log_frame, height=15, width=80, wrap=tk.WORD, font=("Consolas", 9))
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -207,57 +199,43 @@ class VKCollectorApp:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.log_text.configure(yscrollcommand=scrollbar.set)
 
-        # Теги для цветового выделения
         self.log_text.tag_configure("success", foreground="green", font=("Consolas", 9, "bold"))
         self.log_text.tag_configure("warning", foreground="orange", font=("Consolas", 9))
         self.log_text.tag_configure("error", foreground="red", font=("Consolas", 9, "bold"))
         self.log_text.tag_configure("info", foreground="black", font=("Consolas", 9))
         self.log_text.tag_configure("debug", foreground="gray", font=("Consolas", 9))
 
-        # Запрет редактирования
         self.log_text.configure(state=tk.DISABLED)
 
     def _load_saved_settings(self):
         """Загрузка сохранённых настроек из конфига"""
-        # Проверяем, есть ли пользовательский токен в конфиге
-        has_user_token = bool(self.config.data.get("obfuscated_token"))
+        token = self.config.get_token()
 
-        if has_user_token:
-            # Есть пользовательский токен — получаем его через метод get_token()
-            user_token = self.config.get_token()
-            if user_token:
-                self.vk_token = user_token
+        if token:
+            self.vk_token = token
+            has_user_token = bool(self.config.data.get("obfuscated_token"))
+
+            if has_user_token:
                 self.token_entry.delete(0, tk.END)
                 self.token_entry.insert(0, "•" * 32)
-                self.gui_logger.info(f"Загружен пользовательский токен (хеш: {hash_token_for_display(user_token)})")
+                self.gui_logger.info(f"Загружен сохранённый токен (хеш: {hash_token_for_display(token)})")
             else:
-                # Токен в конфиге есть, но не удалось расшифровать — используем токен по умолчанию
-                self.vk_token = self.config.get_token()  # get_token() вернёт токен по умолчанию
                 self.token_entry.delete(0, tk.END)
                 self.token_entry.insert(0, "[ИСПОЛЬЗУЕТСЯ ТОКЕН ПО УМОЛЧАНИЮ]")
                 self.gui_logger.info("Используется встроенный токен по умолчанию")
         else:
-            # Пользовательского токена нет — используем токен по умолчанию
-            self.vk_token = self.config.get_token()  # get_token() вернёт токен по умолчанию
-            if self.vk_token:
-                self.token_entry.delete(0, tk.END)
-                self.token_entry.insert(0, "[ИСПОЛЬЗУЕТСЯ ТОКЕН ПО УМОЛЧАНИЮ]")
-                self.gui_logger.info("Используется встроенный токен по умолчанию")
-            else:
-                # Токен по умолчанию тоже не найден
-                self.gui_logger.warning("Токен не найден. Введите токен вручную.")
+            self.vk_token = ""
+            self.token_entry.delete(0, tk.END)
+            self.gui_logger.warning("Токен не найден. Введите токен вручную.")
 
-        # Группы
         last_groups = self.config.get_last_groups()
         if last_groups:
             self.groups_text.delete("1.0", tk.END)
             self.groups_text.insert("1.0", "\n".join(last_groups))
 
-        # Директория
         last_dir = self.config.get_last_output_dir()
         self.output_dir_var.set(last_dir)
 
-        # Даты (по умолчанию: последние 7 дней)
         today = datetime.now()
         week_ago = today - timedelta(days=7)
         self.date_from.set_date(week_ago)
@@ -267,18 +245,20 @@ class VKCollectorApp:
         """Проверка токена через API ВК"""
         token_input = self.token_entry.get().strip()
 
-        # Проверяем, ввёл ли пользователь новый токен
-        if token_input and not token_input.startswith("[ИСПОЛЬЗУЕТСЯ"):
-            token = token_input.replace("•", "")
-        else:
-            # Пользователь не ввёл токен — используем текущий (по умолчанию или сохранённый)
+        if not token_input or token_input == "[ИСПОЛЬЗУЕТСЯ ТОКЕН ПО УМОЛЧАНИЮ]":
             token = self.vk_token
             if not token:
                 messagebox.showwarning("Внимание", "Введите токен для проверки")
                 return
+        elif all(c == "•" for c in token_input):
+            token = self.vk_token
+            if not token:
+                messagebox.showwarning("Внимание", "Введите токен для проверки")
+                return
+        else:
+            token = token_input.replace("•", "")
 
         try:
-            # Создаём временный клиент
             temp_client = VKClient(token)
             user_info = temp_client.get_user_info()
 
@@ -288,13 +268,11 @@ class VKCollectorApp:
                     self.config.save_token(token, remember=True)
                     self.gui_logger.success(f"Токен сохранён для пользователя {user_info}")
                 else:
-                    self.config.save_token(token, remember=False)
                     self.gui_logger.info(f"Токен проверен для пользователя {user_info} (не сохранён)")
 
                 messagebox.showinfo("Успех", f"Токен действителен!\nПользователь: {user_info}")
-                # Маскируем токен в поле ввода
                 self.token_entry.delete(0, tk.END)
-                self.token_entry.insert(0, "•" * len(token))
+                self.token_entry.insert(0, "•" * 32)
             else:
                 raise Exception("Не удалось получить данные пользователя")
 
@@ -313,7 +291,7 @@ class VKCollectorApp:
                 with open(file_path, "r", encoding="utf-8") as f:
                     groups = [line.strip() for line in f if line.strip()]
                 self.groups_text.delete("1.0", tk.END)
-                self.groups_text.insert("1.0", "\n".join(groups[:30]))  # Ограничение 30 групп
+                self.groups_text.insert("1.0", "\n".join(groups[:30]))
                 self.gui_logger.success(f"Загружено {len(groups)} групп из файла {Path(file_path).name}")
             except Exception as e:
                 self.gui_logger.error(f"Ошибка загрузки файла: {e}")
@@ -334,14 +312,13 @@ class VKCollectorApp:
 
         try:
             import os
-            os.startfile(output_dir)  # Только для Windows
+            os.startfile(output_dir)
         except Exception as e:
             self.gui_logger.warning(f"Не удалось открыть папку: {e}")
             messagebox.showinfo("Информация", f"Папка: {output_dir}")
 
     def _start_collection(self):
         """Запуск сбора постов в отдельном потоке"""
-        # Валидация входных данных
         if not self.vk_token:
             messagebox.showwarning("Внимание", "Сначала проверьте и сохраните токен!")
             return
@@ -373,18 +350,15 @@ class VKCollectorApp:
             messagebox.showerror("Ошибка", f"Неверный период:\n{e}")
             return
 
-        # Сохраняем настройки
         self.config.save_last_groups(groups)
         self.config.save_last_output_dir(output_dir)
 
-        # Блокируем интерфейс
         self.start_btn.config(state=tk.DISABLED)
         self.stop_btn.config(state=tk.NORMAL)
         self.status_var.set("Сбор данных...")
         self.progress_var.set(0.0)
         self.progress_label.config(text="Начинаем сбор...")
 
-        # Запускаем поток сбора
         self.is_collecting = True
         self.collection_thread = threading.Thread(
             target=self._collection_worker,
@@ -395,10 +369,9 @@ class VKCollectorApp:
 
     def _collection_worker(self, groups: list, date_from: datetime, date_to: datetime, output_dir: str):
         """Рабочая функция сбора данных (выполняется в отдельном потоке)"""
-        all_posts = []  # Собираем все посты для единого экспорта
+        all_posts = []
 
         try:
-            # Инициализируем клиент ВК
             self.vk_client = VKClient(self.vk_token)
             total_groups = len(groups)
 
@@ -407,7 +380,6 @@ class VKCollectorApp:
                     self.gui_logger.warning("Сбор остановлен пользователем")
                     return
 
-                # Обновляем прогресс
                 progress = (idx - 1) / total_groups * 100
                 self.root.after(0, lambda p=progress, g=group: self._update_progress(p,
                                                                                      f"Обработка группы {g} ({idx}/{total_groups})"))
@@ -420,20 +392,18 @@ class VKCollectorApp:
                         date_to=date_to
                     )
                     self.gui_logger.success(f"Получено {len(posts)} постов из группы {group}")
-                    all_posts.extend(posts)  # Добавляем посты в общий список
+                    all_posts.extend(posts)
 
                 except Exception as e:
                     self.gui_logger.error(f"Ошибка при сборе группы {group}: {e}")
                     continue
 
-            # Экспорт в Excel после сбора всех групп
             if all_posts and self.is_collecting:
                 self.gui_logger.info(f"Экспортируем {len(all_posts)} постов в Excel...")
                 exporter = ExcelExporter(output_dir, self.gui_logger)
                 excel_path = exporter.export_posts(all_posts)
                 self.gui_logger.success(f"✅ Данные сохранены в: {excel_path}")
 
-            # Завершение
             if self.is_collecting:
                 self.root.after(0, lambda: self._finish_collection(success=True, posts_count=len(all_posts)))
             else:
@@ -444,7 +414,7 @@ class VKCollectorApp:
             self.root.after(0, lambda: self._finish_collection(success=False, error=str(e)))
 
     def _update_progress(self, value: float, label: str):
-        """Обновление прогресс-бара и метки (вызывается из основного потока)"""
+        """Обновление прогресс-бара и метки"""
         self.progress_var.set(value)
         self.progress_label.config(text=label)
 
@@ -473,14 +443,12 @@ class VKCollectorApp:
         self.gui_logger.warning("Пользователь запросил остановку сбора")
 
     def _process_log_queue(self):
-        """Обработка очереди логов для вывода в GUI (вызывается периодически)"""
-        # Обрабатываем все сообщения в очереди
+        """Обработка очереди логов для вывода в GUI"""
         while not self.log_queue.empty():
             try:
                 record = self.log_queue.get_nowait()
                 msg = self._format_log_record(record)
 
-                # Определяем тег для цвета
                 tag = "info"
                 if record.levelno >= logging.ERROR:
                     tag = "error"
@@ -489,10 +457,9 @@ class VKCollectorApp:
                 elif "✅" in msg or "успешно" in msg.lower():
                     tag = "success"
 
-                # Выводим в текстовое поле
                 self.log_text.configure(state=tk.NORMAL)
                 self.log_text.insert(tk.END, msg + "\n", tag)
-                self.log_text.see(tk.END)  # Прокрутка вниз
+                self.log_text.see(tk.END)
                 self.log_text.configure(state=tk.DISABLED)
 
             except queue.Empty:
@@ -500,11 +467,10 @@ class VKCollectorApp:
             except Exception as e:
                 print(f"Ошибка вывода лога: {e}")
 
-        # Планируем следующую проверку
         self.root.after(100, self._process_log_queue)
 
     def _format_log_record(self, record: logging.LogRecord) -> str:
         """Форматирование записи лога для отображения в GUI"""
         timestamp = datetime.fromtimestamp(record.created).strftime('%H:%M:%S')
-        level = record.levelname[0]  # 'I', 'W', 'E'
+        level = record.levelname[0]
         return f"[{timestamp}] [{level}] {record.getMessage()}"

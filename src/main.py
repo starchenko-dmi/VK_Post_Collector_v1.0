@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Точка входа в приложение VK Post Collector (с отладкой)"""
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -6,6 +5,7 @@ import sys
 import os
 import traceback
 from pathlib import Path
+from src.core.default_token import get_default_token
 
 # Отладка: выводим информацию об окружении
 print("=" * 60)

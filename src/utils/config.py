@@ -64,22 +64,33 @@ class AppConfig:
 
     def get_token(self) -> Optional[str]:
         """Получение токена из конфига или возврат токена по умолчанию"""
+        import logging
+        logger = logging.getLogger(__name__)
+
         # Сначала пробуем получить пользовательский токен
         obfuscated = self.data.get("obfuscated_token")
         if obfuscated:
+            logger.info(f"Найден obfuscated_token в конфиге (длина: {len(obfuscated)})")
             user_token = deobfuscate_token(obfuscated)
             if user_token:
+                logger.info(f"Пользовательский токен успешно расшифрован (длина: {len(user_token)})")
                 return user_token
+            else:
+                logger.warning("Не удалось расшифровать пользовательский токен")
 
         # Если пользовательского токена нет — возвращаем токен по умолчанию
         try:
             from ..core.default_token import get_default_token
             default_token = get_default_token()
             if default_token:
+                logger.info(f"Используется токен по умолчанию (длина: {len(default_token)})")
                 return default_token
-        except Exception:
-            pass
+            else:
+                logger.warning("Токен по умолчанию пустой")
+        except Exception as e:
+            logger.error(f"Ошибка загрузки токена по умолчанию: {e}")
 
+        logger.error("Токен не найден нигде")
         return None
 
     def save_last_groups(self, groups: List[str]):
